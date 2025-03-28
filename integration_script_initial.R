@@ -14,8 +14,8 @@ features <- SelectIntegrationFeatures(object.list = integration_list, nfeatures 
 gc()
 data.anchors <- FindIntegrationAnchors(object.list = integration_list, anchor.features = features)
 data.anchors
-data.anchorsrpca <- FindIntegrationAnchors(object.list = integration_list, anchor.features = features, reduction = 'cca')
-data.anchorsrpca
+
+
 gc()
 cornea <- IntegrateData(anchorset = data.anchors)
 gc()
@@ -42,7 +42,7 @@ DefaultAssay(cornea) <- 'RNA'
 DefaultAssay(cornea150) <- 'RNA'
 
 library(SeuratDisk)
-SaveH5Seurat(cornea150, '/home/bnvlab2/Documents/Kate/Cornea/Cells_Subset/cornea150.h5Seurat', overwrite = TRUE)
-SaveH5Seurat(cornea, '/home/bnvlab2/Documents/Kate/Cornea/Cells_Subset/cornea30.h5Seurat', overwrite = TRUE)
-saveRDS(cornea150, '/home/bnvlab2/Documents/Kate/Cornea/Cells_Subset/cornea150.rds')
-saveRDS(cornea, '/home/bnvlab2/Documents/Kate/Cornea/Cells_Subset/cornea30.rds')
+SaveH5Seurat(cornea150, '/home/bnvlab2/Documents/Kate/Cornea/Cells_Subset/cornea150_initial.h5Seurat', overwrite = TRUE)
+SaveH5Seurat(cornea, '/home/bnvlab2/Documents/Kate/Cornea/Cells_Subset/cornea30_initial.h5Seurat', overwrite = TRUE)
+saveRDS(cornea150, '/home/bnvlab2/Documents/Kate/Cornea/Cells_Subset/cornea150_initial.rds')
+saveRDS(cornea, '/home/bnvlab2/Documents/Kate/Cornea/Cells_Subset/cornea30_initial.rds')
