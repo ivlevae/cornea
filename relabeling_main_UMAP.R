@@ -7,9 +7,11 @@ markers_subset <- list(
   'Keratocytes' = c( "DCN", "COL6A3", "CEMIP", "LSAMP", "ABCA6", "PTPRG", "MME",  "LUM", "KERA") ##keratocytes
 )
 
+source("subset_cell_markers.R")
 
+cornea150_res1_copy <- LoadH5Seurat('/home/bnvlab2/Documents/Kate/Cornea/Cells_Subset2/cornea150_res1.h5Seurat')
+DefaultAssay(cornea150_res1_copy)
 
-cornea150_res1 <- LoadH5Seurat('/home/bnvlab2/Documents/Kate/Cornea/Cells_Subset2/cornea150_res1.h5Seurat')
 table(cornea150_res1$seurat_clusters)
 table(cornea150_res1$annot_V1)
 DefaultAssay(cornea150_res1)
@@ -124,6 +126,10 @@ p <- DotPlot(subset13_proccesed,
              assay = NULL, cols = c("lightgrey", "blue"))
 p + theme(axis.text.x = element_text(angle = 90) )
 
+
+
+
+
 res2 <- AddScores(subset13_proccesed, all_cell_markers_all_subset)
 
 p <- DotPlot(res2$data,
@@ -221,69 +227,76 @@ for (cell_type in names(table(subset16_proccesed$annot))){
 
 
 ###################    '0' - endothelium + smth 
-
+DefaultAssay(cornea150_res1) <- 'integrated'
 subset_0 <- subset(cornea150_res1, seurat_clusters == '0')
 dim(subset_0)
-ProcessInt <- function(data.integrated){
+ProcessInt_150 <- function(data.integrated){
   data.integrated <- ScaleData(data.integrated, verbose = T, vars.to.regress = c('percent.mt',"percent.rb","S.Score","G2M.Score"))
-  data.integrated <- RunPCA(data.integrated, npcs = 30, verbose = T)
-  data.integrated <- FindNeighbors(data.integrated, dims = 1:30)
-  data.integrated <- FindClusters(data.integrated, resolution = 1)
-  data.integrated <- RunUMAP(data.integrated, reduction = "pca", dims = 1:30)
+  data.integrated <- RunPCA(data.integrated, npcs = 150, verbose = T)
+  data.integrated <- FindNeighbors(data.integrated, dims = 1:150)
+  data.integrated <- FindClusters(data.integrated, resolution = 3)
+  data.integrated <- RunUMAP(data.integrated, reduction = "pca", dims = 1:150)
 }
 
-dim(subset_0)
-subset_0_proccesed <- ProcessInt(subset_0)
-DimPlot(subset_0_proccesed, reduction = "umap", raster = TRUE, label = T, label.box = T,
+
+subset_0_proccesed_150_res3 <- ProcessInt_150(subset_0)
+DimPlot(subset_0_proccesed_159, reduction = "umap", raster = TRUE, label = T, label.box = T,
         repel = T) + NoLegend() 
-DefaultAssay(subset_0_proccesed) <- 'RNA'
+DimPlot(subset_0_proccesed_150_res3, reduction = "umap", raster = TRUE, label = T, label.box = T,
+        repel = T) + NoLegend() 
+DefaultAssay(subset_0_proccesed_150_res3) <- 'RNA'
 
 
-p <- DotPlot(subset_0_proccesed,
+p <- DotPlot(subset_0_proccesed_150_res3,
              features = markers_subset,
              assay = NULL, cols = c("lightgrey", "blue"))
 p + theme(axis.text.x = element_text(angle = 90) )
 
 
-res2 <- AddScores(subset_0_proccesed, all_cell_markers_all_subset)
+res2 <- AddScores(subset_0_proccesed_150_res3, all_cell_markers_all_subset)
 
 p <- DotPlot(res2$data,
              features = res2$features,
              assay = NULL, cols = c("lightgrey", "blue"))
 p + theme(axis.text.x = element_text(angle = 90) )
 
-subset_0_proccesed@active.ident <- subset_0_proccesed$seurat_clusters
-subset_0_proccesed <-RenameIdents(subset_0_proccesed,  "0" = "Corneal basal epithelium",
-                                  "1" = "Keratocytes",
-                                  "2" = "Corneal basal epithelium",
-                                  "3" = "Corneal basal epithelium",
+subset_0_proccesed_150_res3@active.ident <- subset_0_proccesed_150_res3$seurat_clusters
+
+subset_0_proccesed_150_res3 <-RenameIdents(subset_0_proccesed_150_res3,  "0" = "Keratocytes",
+                                  "1" = "Kera/Epi",
+                                  "2" = "Corneal endothelium",
+                                  "3" = "Keratocytes/endothelium",
                                   "4" = "Keratocytes",
-                                  "5" = "Corneal basal epithelium",
-                                  "6" = "Kera/Epi",
+                                  "5" = "Keratocytes",
+                                  "6" = "Keratocytes",
                                   "7" = "Keratocytes",
-                                  "8" = "Keratocytes",
-                                  "9" = "Corneal basal epithelium",
-                                  "10" = "TAC",
-                                  "11" = "Corneal basal epithelium",
-                                  "12" = "Corneal basal epithelium",
-                                  "13" = "Corneal basal epithelium",
-                                  "14" = "Corneal basal epithelium",
-                                  "15" = "Corneal basal epithelium",
-                                  "16" = "Corneal basal epithelium",
-                                  "17" = "Limbal fibroblasts",
-                                  "18" = "Conjunctiva",
-                                  "19" = "Keratocytes",
-                                  "20" = "Keratocytes"
+                                  "8" = "Keratocytes/endothelium",
+                                  "9" = "Keratocytes",
+                                  "10" = "Keratocytes",
+                                  "11" = "Keratocytes",
+                                  "12" = "Limbal fibroblasts",
+                                  "13" = "Limbal fibroblasts",
+                                  "14" = "Keratocytes/endothelium",
+                                  "15" = "Limbal fibroblasts",
+                                  "16" = "Corneal endothelium",
+                                  "17" = "Corneal endothelium",
+                                  "18" = "Kera/Epi",
+                                  "19" = "Kera/Epi"
 )
-subset_0_proccesed$annot<- subset_0_proccesed@active.ident
+                                  
+                                  
+                                  
+subset_0_proccesed_150_res3$annot<- subset_0_proccesed_150_res3@active.ident
 
+table(subset_0_proccesed_150_res3$annot)
 
-DimPlot(subset_0_proccesed, reduction = "umap", raster = TRUE, label = T, label.box = T,
+DimPlot(subset_0_proccesed_150_res3, reduction = "umap", raster = TRUE, label = T, label.box = T,
         repel = T) + NoLegend() 
+levels(cornea150_res1$annot_V1) <- c(levels(cornea150_res1$annot_V1), "Keratocytes/endothelium")
 
-for (cell_type in names(table(subset_0_proccesed$annot))){
+for (cell_type in names(table(subset_0_proccesed_150_res3$annot))){
   print(cell_type)
-  subsetObj <- subset(subset_0_proccesed, annot %in% c(cell_type))
+  subsetObj <- subset(subset_0_proccesed_150_res3, annot %in% c(cell_type))
   print(dim(subsetObj))
   subset_cells <- Cells(subsetObj)
   cornea150_res1@meta.data[subset_cells, "annot_V1"] <- cell_type
@@ -291,13 +304,78 @@ for (cell_type in names(table(subset_0_proccesed$annot))){
 }
 
 
-cornea150_res1$annot_V1 <- droplevels(cornea150_res1$annot_V1)
-
-# Check the updated levels
 
 
 
-########################
+######################## kera/endo
+
+DefaultAssay(cornea150_res1) <- 'integrated'
+subset_kera_endo <- subset(cornea150_res1, annot_V1 == 'Keratocytes/endothelium')
+dim(subset_kera_endo)
+ProcessInt_150 <- function(data.integrated){
+  data.integrated <- ScaleData(data.integrated, verbose = T, vars.to.regress = c('percent.mt',"percent.rb","S.Score","G2M.Score"))
+  data.integrated <- RunPCA(data.integrated, npcs = 150, verbose = T)
+  data.integrated <- FindNeighbors(data.integrated, dims = 1:150)
+  data.integrated <- FindClusters(data.integrated, resolution = 1)
+  data.integrated <- RunUMAP(data.integrated, reduction = "pca", dims = 1:150)
+}
+
+
+subset_kera_endo_res3 <- ProcessInt_150(subset_kera_endo)
+DimPlot(subset_kera_endo_res3, reduction = "umap", raster = TRUE, label = T, label.box = T,
+        repel = T) + NoLegend() 
+
+DefaultAssay(subset_kera_endo_res3) <- 'integrated'
+
+
+p <- DotPlot(subset_kera_endo_res3,
+             features = markers_subset,
+             assay = NULL, cols = c("lightgrey", "blue"))
+p + theme(axis.text.x = element_text(angle = 90) )
+
+
+res2 <- AddScores(subset_kera_endo_res3, all_cell_markers_all_subset)
+
+p <- DotPlot(res2$data,
+             features = res2$features,
+             assay = NULL, cols = c("lightgrey", "blue"))
+p + theme(axis.text.x = element_text(angle = 90) )
+
+
+table(subset_kera_endo_res3$seurat_clusters)
+subset_kera_endo_res3@active.ident <- subset_kera_endo_res3$seurat_clusters
+
+
+subset_kera_endo_res3 <-RenameIdents(subset_kera_endo_res3,  
+                                           "0" = "Keratocytes",
+                                           "1" = "Corneal endothelium",
+                                           "2" = "Corneal endothelium/Keratocytes",
+                                           "3" = "Corneal endothelium/Keratocytes"
+)
+
+
+
+subset_kera_endo_res3$annot<- subset_kera_endo_res3@active.ident
+
+table(subset_kera_endo_res3$annot)
+
+DimPlot(subset_kera_endo_res3, reduction = "umap", raster = TRUE, label = T, label.box = T,
+        repel = T) + NoLegend() 
+
+
+levels(cornea150_res1$annot_V1) <- c(levels(cornea150_res1$annot_V1), "Corneal endothelium/Keratocytes")
+
+for (cell_type in names(table(subset_kera_endo_res3$annot))){
+  print(cell_type)
+  subsetObj <- subset(subset_kera_endo_res3, annot %in% c(cell_type))
+  print(dim(subsetObj))
+  subset_cells <- Cells(subsetObj)
+  cornea150_res1@meta.data[subset_cells, "annot_V1"] <- cell_type
+  cornea150_res1@active.ident <- cornea150_res1$annot_V1
+}
+
+
+########## check the whole UMAP
 
 table(cornea150_res1$annot_V1)
 dim(cornea150_res1)
@@ -307,7 +385,7 @@ DimPlot(cornea150_res1, reduction = "umap", raster = TRUE, label = T, label.box 
 DimPlot(cornea150_res1, reduction = "umap", group.by = 'annot_V1',
         split.by = "annot_V1", raster = TRUE, ncol=6, pt.size = 4)  + NoLegend()
 
-
+DefaultAssay(cornea150_res1) <- 'RNA'
 
 p <- DotPlot(cornea150_res1,
              features = markers_subset,
@@ -315,7 +393,12 @@ p <- DotPlot(cornea150_res1,
 p + theme(axis.text.x = element_text(angle = 90) )
 
 
+res2 <- AddScores(cornea150_res1, all_cell_markers_all_subset)
 
+p <- DotPlot(res2$data,
+             features = res2$features,
+             assay = NULL, cols = c("lightgrey", "blue"))
+p + theme(axis.text.x = element_text(angle = 90) )
 
 
 table(cornea150_res1$annot_V1)
@@ -333,6 +416,9 @@ DimPlot(cornea150_res1_copy, reduction = "umap", group.by = 'annot_V1',
 
 SaveH5Seurat(cornea150_res1, 'cornea150_res1_changed_annot.h5Seurat', overwrite = TRUE)
 
+SaveH5Seurat(subset_2_proccesed, 'subset_2_proccesed.h5Seurat', overwrite = TRUE)
+SaveH5Seurat(subset13_proccesed, 'subset13_proccesed.h5Seurat', overwrite = TRUE)
+SaveH5Seurat(subset16_proccesed, 'subset16_proccesed.h5Seurat', overwrite = TRUE)
 
 DefaultAssay(cornea150_res1) <- 'RNA'
 p <- DotPlot(cornea150_res1,
@@ -347,3 +433,94 @@ p <- DotPlot(res2$data,
              assay = NULL, cols = c("lightgrey", "blue"))
 p + theme(axis.text.x = element_text(angle = 90) )
 
+
+######################## kera/endo
+
+DefaultAssay(cornea150_res1) <- 'integrated'
+subset_kera_epi <- subset(cornea150_res1, annot_V1 == 'Kera/Epi')
+dim(subset_kera_epi)
+ProcessInt_150 <- function(data.integrated){
+  data.integrated <- ScaleData(data.integrated, verbose = T, vars.to.regress = c('percent.mt',"percent.rb","S.Score","G2M.Score"))
+  data.integrated <- RunPCA(data.integrated, npcs = 150, verbose = T)
+  data.integrated <- FindNeighbors(data.integrated, dims = 1:150)
+  data.integrated <- FindClusters(data.integrated, resolution = 3)
+  data.integrated <- RunUMAP(data.integrated, reduction = "pca", dims = 1:150)
+}
+
+
+subset_kera_epi_res3<- ProcessInt_150(subset_kera_epi)
+DimPlot(subset_kera_epi_res3, reduction = "umap", raster = TRUE, label = T, label.box = T,
+        repel = T) + NoLegend() 
+
+DefaultAssay(subset_kera_epi_res3) <- 'RNA'
+
+
+p <- DotPlot(subset_kera_epi_res3,
+             features = markers_subset,
+             assay = NULL, cols = c("lightgrey", "blue"))
+p + theme(axis.text.x = element_text(angle = 90) )
+
+
+res2 <- AddScores(subset_kera_epi_res3, all_cell_markers_all_subset)
+
+p <- DotPlot(res2$data,
+             features = res2$features,
+             assay = NULL, cols = c("lightgrey", "blue"))
+p + theme(axis.text.x = element_text(angle = 90) )
+
+
+table(subset_kera_epi_res3$seurat_clusters)
+subset_kera_epi_res3@active.ident <- subset_kera_epi_res3$seurat_clusters
+
+
+subset_kera_epi_res3 <-RenameIdents(subset_kera_epi_res3,  
+                                    "0" = "Corneal wing epithelium",
+                                    "1" = "Corneal endothelium",
+                                    "2" = "Corneal wing epithelium",
+                                    "3" = "Corneal basal epithelium",
+                                    "4" = "Limbal fibroblasts",
+                                    "5" = "Keratocytes",
+                                    "6" = "Corneal superficial epithelium",
+                                    "7" = "Corneal basal epithelium",
+                                    "8" = "Myofibroblasts",
+                                    "9" = "Conjunctiva",
+                                    "10" = "Keratocytes"
+)
+
+
+
+subset_kera_epi_res3$annot<- subset_kera_epi_res3@active.ident
+
+table(subset_kera_epi_res3$annot)
+
+DimPlot(subset_kera_epi_res3, reduction = "umap", raster = TRUE, label = T, label.box = T,
+        repel = T) + NoLegend() 
+
+
+levels(cornea150_res1$annot_V1) <- c(levels(cornea150_res1$annot_V1), "Corneal endothelium/Keratocytes")
+
+for (cell_type in names(table(subset_kera_epi_res3$annot))){
+  print(cell_type)
+  subsetObj <- subset(subset_kera_epi_res3, annot %in% c(cell_type))
+  print(dim(subsetObj))
+  subset_cells <- Cells(subsetObj)
+  cornea150_res1@meta.data[subset_cells, "annot_V1"] <- cell_type
+  cornea150_res1@active.ident <- cornea150_res1$annot_V1
+}
+
+
+
+
+
+########## check the whole UMAP
+
+table(cornea150_res1$annot_V1)
+dim(cornea150_res1)
+
+DimPlot(cornea150_res1, reduction = "umap", raster = TRUE, label = T, label.box = T,
+        repel = T) + NoLegend() 
+DimPlot(cornea150_res1, reduction = "umap", group.by = 'annot_V1',
+        split.by = "annot_V1", raster = TRUE, ncol=6, pt.size = 4)  + NoLegend()
+
+
+SaveH5Seurat(cornea150_res1, 'cornea150_res1_changed_annot_V2.h5Seurat', overwrite = TRUE)
