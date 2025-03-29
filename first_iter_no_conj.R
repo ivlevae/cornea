@@ -1,22 +1,19 @@
 
 cornea150_relabeled <- LoadH5Seurat('cornea150_res1_changed_annot_V2.h5Seurat')
-cornea150_relabeled <- cornea150_res1
+
 DefaultAssay(cornea150_relabeled) <- 'integrated'
 
 
-DimPlot(cornea150_relabeled, reduction = "umap", raster = TRUE, label = T, label.box = T,
-        repel = T) + NoLegend() 
-
 cornea150_relabeled <- RenameIdents(cornea150_relabeled, 
                                    "Corneal endothelium/Keratocytes" = "Corneal endothelium")
+
+
+##################################### cut non-corneal cell types #############################
 
 cornea150_relabeled_filtered <- subset(cornea150_relabeled, idents = setdiff(levels(cornea150_relabeled), c('Conjunctiva', 'Melanocytes', 
                                                                                                    'Corneal endothelium/Keratocytes')))
 cornea150_relabeled_filtered@meta.data$annot_V1 <- droplevels(cornea150_relabeled_filtered@meta.data$annot_V1)
 cornea150_relabeled_filtered <- subset(cornea150_relabeled_filtered, idents = unique(cornea150_relabeled_filtered@meta.data$annot_V1))
-
-DimPlot(cornea150_relabeled_filtered, reduction = "umap", raster = TRUE, label = T, label.box = T,
-        repel = T) + NoLegend() 
 
 
 
@@ -31,19 +28,22 @@ ProcessInt <- function(data.integrated, npcs, res=1){
 
 DefaultAssay(cornea150_relabeled_filtered) <- 'integrated'
 
+########################### reprocess Seurat Object ###################################
+
 cornea150_relabeled_filtered <- ProcessInt(cornea150_relabeled_filtered, 30, 1)
 cornea150_relabeled_filtered_30 <- cornea150_relabeled_filtered
 
 
 SaveH5Seurat(cornea150_relabeled_filtered_30,  'cornea150_relabeled_filtered_30.h5Seurat', overwrite = TRUE)
 
+######################### trying different resolutions ####################################
 
 cornea150_relabeled_filtered_30_res3 <- ProcessInt(cornea150_relabeled_filtered, 30, 3)
 cornea150_relabeled_filtered_30_res2 <- ProcessInt(cornea150_relabeled_filtered, 30, 2)
 DimPlot(cornea150_relabeled_filtered_30, reduction = "umap", raster = TRUE, label = T, label.box = T,
         repel = T) + NoLegend() 
 table(cornea150_relabeled_filtered_30_res2$seurat_clusters)
-############# 30 PC
+########################3 30 PC resolution 1 ###########################
 
 DefaultAssay(cornea150_relabeled_filtered_30) <- 'RNA'
 
@@ -101,6 +101,9 @@ table(cornea150_relabeled_filtered_30$annot)
 
 DimPlot(cornea150_relabeled_filtered_30, reduction = "umap", group.by = 'annot',
         split.by = "annot", raster = TRUE, ncol=6, pt.size = 4)  + NoLegend()
+
+
+################### working with clusters with mixed biomarkers signals ##############################
 
 kera_epi <- subset(cornea150_relabeled_filtered_30, annot == 'Epi/kera')
 table(kera_epi$annot_V1)
@@ -180,7 +183,7 @@ cornea150_relabeled_filtered_30$annot_V1_1 <- cornea150_relabeled_filtered_30$an
 levels(cornea150_relabeled_filtered_30$annot_V1_1) <- c(levels(cornea150_relabeled_filtered_30$annot_V1_1), "Conjunctiva")
 
 
-
+########### manually renaming ###################
 for (cell_type in names(table(subset_19_proccesed$annot))){
   print(cell_type)
   subsetObj <- subset(subset_19_proccesed, annot %in% c(cell_type))
@@ -250,7 +253,7 @@ DimPlot(subset_3_proccesed, reduction = "umap", raster = TRUE, label = T, label.
 
 #cornea150_relabeled_filtered_30$annot_V1_1 <- cornea150_relabeled_filtered_30$annot
 
-
+########### manually renaming ################### 
 for (cell_type in names(table(subset_3_proccesed$annot))){
   print(cell_type)
   subsetObj <- subset(subset_3_proccesed, annot %in% c(cell_type))
