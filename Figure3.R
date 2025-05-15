@@ -1,159 +1,188 @@
 ###########  Endothelium 
-FeaturePlot(prefinalObj, 
-            features= c('POU6F2',  'COL4A3', 'COL8A1', 'COL4A4'), 
-            raster = F,
-            order = T) &NoAxes() & NoLegend()
+FeaturePlot(cornea, 
+            features= c('POU6F2',  'COL4A3', 'COL8A1', 'COL4A4' , 'CA12', 'SLC4A11', 'SLC4A4'), 
+            raster = T,
+            order = T, reduction = 'scVI') &NoAxes() & NoLegend()
 
 
 
 ###########  Keratocytes
-FeaturePlot(prefinalObj, 
-            features= c( 'KERA', 'COL6A3', 'COL1A2', 'TIMP2'), raster = F,
+FeaturePlot(cornea, 
+            features= c( 'KERA', 'NNMT', 'DCN', 'TIMP2'), raster = T, reduction = 'scVI',
             order = T) &NoAxes() & NoLegend()
 
 
 ###################### Epitheliumn 
-FeaturePlot(prefinalObj, 
+FeaturePlot(cornea, 
             features= c(
-              'ELF3', 'TACSTD2'), 
-            raster = F,
-            order = T) &NoAxes() & NoLegend()
+              'PAX6',    'KRT5', 'KRT24', 'MYH14', 'DSP', 'KRT15' ), 
+            raster = F, reduction = 'scVI'#,
+           # order = T
+            ) &NoAxes() & NoLegend()
 
 
 ################## All together ###################
 
-FeaturePlot(prefinalObj, 
-            features= c( 'POU6F2',  'COL4A4', 'COL8A1',  'MMP17',
-                         'KERA', 'COL6A3', 'COL1A2', 'TIMP2',         
-                         'TACSTD2',    'KRT3', 'KRT24', #'COL7A1', 
+FeaturePlot(cornea, 
+            features= c( 'POU6F2',  'COL4A4', 'COL8A1',  'MMP17',  
+                         'DCN', 'COL6A2',  'COL12A1', 'MMP3', ## 'COL6A3', 'COL1A2', 
+                         'PAX6',    'KRT3', 'KRT5', #'COL7A1', 
                          'ADAMTS14'), 
             raster = F,
-            ncol = 4,
-            order = T) &NoAxes() & NoLegend()
+            ncol = 4, reduction = 'scVI', order = T
+            ) &NoAxes() & NoLegend()
 
 
 
 
 ###################################### Pheatmaps ########################################
-
-
-
-markers_subset_krt <- c("KRT1", "KRT2", "KRT3", "KRT4", "KRT5", "KRT6A", "KRT6B",  "KRT7", "KRT8", "KRT9", "KRT10", "KRT12", "KRT13", "KRT14", "KRT15", "KRT16", "KRT17", "KRT18", "KRT19", "KRT20", "KRT23", "KRT24", "KRT27",  "KRT77", "KRT78", "KRT79", "KRT80")
-markers_subset_col <- c("COL1A1", "COL1A2",  "COL3A1", "COL4A1", "COL4A2", "COL4A3", "COL4A4", "COL4A5", "COL4A6", "COL5A1", "COL5A2", "COL5A3", "COL6A1", "COL6A2", "COL6A3", "COL6A5", "COL6A6", "COL7A1", "COL8A1", "COL8A2", "COL9A1",  "COL9A3", "COL10A1", "COL11A2", "COL12A1", "COL13A1", "COL14A1", "COL15A1", "COL16A1", "COL17A1", "COL18A1",  "COL21A1", "COL22A1",  "COL27A1", "COL28A1")
-
-mmp_genes <- c( 'MMP1', 'MMP2', 'MMP3', 'MMP7', 'MMP8', 'MMP9', 'MMP10', 
-                'MMP11',  'MMP12',  'MMP13', 'MMP14', 'MMP15',  'MMP16', 
-                'MMP17',  'MMP19',   'MMP20',  'MMP21',  
-                'MMP24', 'MMP25', 'MMP26', 'MMP27', 
-                'MMP28' ,
-                "TIMP1", "TIMP2", "TIMP3", 
-                'ADAMTS1', 'ADAMTS2', 'ADAMTS3', 'ADAMTS4', 'ADAMTS5',  'ADAMTS6', 'ADAMTS7', 'ADAMTS8', 'ADAMTS9', 
-                'ADAMTS10', 'ADAMTS12', 'ADAMTS13', 'ADAMTS14','ADAMTS17')
-
-############ change gene_list markers_subset_col 
-gene_list <- markers_subset_col
-DefaultAssay(prefinalObj) <- 'RNA'
-gene_expression <- FetchData(prefinalObj,
-                             vars = c(gene_list, "detailed_annot", 'condition_detailed'))
-
-
-avg_table <- AverageExpression(prefinalObj,  assays = 'RNA', features =  gene_list, group.by = c('detailed_annot'))
-avg_table <- as.data.frame(avg_table)
-
-
-
-# 
-avg_table_transposed <- t(avg_table)
-
-avg_table_transposed <-  as.data.frame(avg_table_transposed)
-scaled_gene_expression <- avg_table_transposed %>%
-  mutate(across(all_of(gene_list), ~ (.-min(.)) / (max(.) - min(.))))
-
-
 desired_order <- c("Corneal Superficial",
                    "Corneal Wing",
                    "Corneal Basal",
                    "TAC",
-                   'Limbal Suprabasal',
+                   #'Limbal Suprabasal',
                    "Limbal Basal",
                    "Keratocytes",
                    "Myofibroblasts",
                    'Limbal fibroblasts',
                    "Endothelium") 
 
+
+extract_genes <- function(gene_list, pattern) {
+  regex <- sprintf("^%s\\d{1,2}([A-OR-Z]?\\d?)?$", pattern) 
+  pattern_genes <- grep(regex, gene_list, value = TRUE)
+  
+  gene_expression <- FetchData(cornea, vars = c(pattern_genes))
+  mean_expression <- colMeans(gene_expression, na.rm = TRUE)
+  zero_expr_genes <- names(mean_expression[mean_expression == 0])
+  pattern_genes_filtered <- pattern_genes[!pattern_genes %in% zero_expr_genes]
+  
+  return(pattern_genes_filtered)
+}
+
+all_MMP <- extract_genes(rownames(cornea), 'MMP')
+all_MMP
+
+all_adam <- extract_genes(rownames(cornea), 'ADAMTS')
+all_adam
+
+all_timp <- extract_genes(rownames(cornea), 'TIMP')
+all_timp
+
+all_cols <- extract_genes(rownames(cornea), 'COL')
+all_cols
+
+all_krt<- extract_genes(rownames(cornea), 'KRT')
+all_krt
+
+
+ecm_genes <- c(all_MMP, all_adam, all_timp)
+
+
+##############################    Heatmap calculation and plotting #################################
+cornea$leiden_annot_V3 <- factor(cornea$leiden_annot_V3, levels = desired_order)
+cornea_healthy <- subset(cornea, condition_detailed == 'Healthy')
+
+
+
+############ change gene_list for ecm_genes, all_krt, all_cols
+gene_list <- all_krt  
+DefaultAssay(cornea) <- 'RNA'
+
+
+avg_table <- AverageExpression(cornea_healthy,  assays = 'RNA', features =  gene_list, group.by = c('leiden_annot_V3'))
+avg_table <- as.data.frame(avg_table)
+avg_table_transposed <- as.data.frame(t(avg_table))
+
+scaled_gene_expression <- avg_table_transposed %>%
+  mutate(across(all_of(gene_list), ~ (.-min(.)) / (max(.) - min(.))))
+
+
 rownames(scaled_gene_expression) <- desired_order
-scaled_gene_expression <- scaled_gene_expression[match(rev(desired_order), rownames(scaled_gene_expression)), ]
+scaled_gene_expression <- scaled_gene_expression[rev(desired_order), ]
 
 
 pheatmap_result <- pheatmap(
   scaled_gene_expression,
-  #ordered_avg_table_df_selected ,
   cellwidth = 12,
   cellheight = 12,
   cluster_rows = F,  # Cluster rows
-  cluster_cols = F,  # Cluster columns
+  cluster_cols = T,  # Cluster columns
   scale = "none"  ,       # No scaling
-  treeheight_col = 0
+  treeheight_col = 0,
+  angle_col = 90
 )
 
 
-ordered_cols_cols <- c("COL10A1", "COL4A5",
-                       "COL6A5",  "COL5A2" , "COL8A2" , "COL27A1", "COL4A6" ,"COL8A1" , "COL4A3" , "COL4A4" ,
-                       "COL15A1",
-                       "COL6A1" , "COL6A2" , "COL16A1", "COL9A1",  "COL1A1",  "COL3A1",  "COL1A2" , "COL6A6" , "COL5A1" , "COL14A1",
-                       "COL9A3" , "COL11A2" ,"COL6A3" ,  "COL18A1", "COL4A1" , "COL4A2","COL5A3" ,"COL12A1", "COL13A1",
-                       "COL7A1" , "COL17A1","COL22A1",
-                       "COL21A1", "COL28A1" )
+################# order for diagonal 
 
-pheatmap_result <- pheatmap(
-  scaled_gene_expression[, ordered_cols_cols],
+dim(scaled_gene_expression)
+length(ordered_cols2)
+ordered_ecm <- c(   "MMP24", "ADAMTS16", "ADAMTS13", "ADAMTS19",
+                     "MMP17", "ADAMTS6", "TIMP3", "MMP11", "MMP14", "ADAMTS10", "ADAMTS2",
+                     "ADAMTS8", "MMP19", "ADAMTS5", "ADAMTS3", "MMP27", "MMP23B", "TIMP4",
+                     "MMP16", "ADAMTS15", "ADAMTS7", "MMP2", "TIMP2" , "MMP21", "MMP25",   "ADAMTS1", "ADAMTS12", "ADAMTS4",
+                     "ADAMTS9",  "MMP13", "TIMP1", "MMP8", "MMP10", "MMP1", "MMP3", "MMP12",  "MMP9",
+                     "MMP7", "MMP20", "MMP15",   "MMP28", "MMP26",  "ADAMTS20",   "ADAMTS18" ,"ADAMTS17", "ADAMTS14", "MMP23A" 
+)
+
+pheatmap(
+  scaled_gene_expression[, ordered_ecm],
   cellwidth = 12,
   cellheight = 12,
   cluster_rows = F,  # Cluster rows
   cluster_cols = F,  # Cluster columns
   scale = "none"  ,       # No scaling
-  treeheight_col = 0
+  treeheight_col = 0,
+  angle_col = 90
 )
 
 
-ordered_cols_krt <-c(  "KRT1" ,"KRT20", "KRT9" , "KRT14",  "KRT15" , "KRT8" ,
-                       "KRT12", "KRT5",  "KRT18", "KRT10", "KRT7" , "KRT19", "KRT77","KRT16", "KRT3" , 
-                       "KRT17", "KRT6A", 
-                       "KRT13", "KRT6B" ,"KRT2"  ,"KRT80", "KRT23", "KRT27", "KRT78", "KRT4" , "KRT24", "KRT79")
+dim(scaled_gene_expression)
+length(ordered_cols2)
 
-pheatmap_result <- pheatmap(
-  scaled_gene_expression[, ordered_cols_krt],
+ordered_cols2 <- c(  "COL8A1", "COL4A4", "COL4A3",   "COL4A6", "COL4A5", "COL27A1",  "COL26A1",
+                      "COL5A2", "COL8A2","COL19A1",  "COL20A1",  "COL11A2", "COL2A1",'COL6A5',
+                     "COL24A1",  "COL15A1", "COL1A1", "COL6A6", "COL10A1",
+                     "COL9A3", "COL5A1", "COL11A1", "COL14A1", "COL16A1", "COL1A2", "COL3A1",
+                    "COL25A1",  "COL23A1","COL6A3",    "COL6A2",  "COL13A1",
+                     "COL6A1", "COL18A1",  "COL9A1",  "COL4A1", "COL4A2",   "COL9A2", "COL12A1","COL17A1",
+                     "COL7A1", "COL22A1",  "COL5A3", "COL21A1",  "COL28A1"
+                     )
+pheatmap(
+  scaled_gene_expression[, ordered_cols2],
   cellwidth = 12,
   cellheight = 12,
   cluster_rows = F,  # Cluster rows
   cluster_cols = F,  # Cluster columns
   scale = "none"  ,       # No scaling
-  treeheight_col = 0
+  treeheight_col = 0,
+  angle_col = 90
 )
 
+dim(scaled_gene_expression)
+length(ordered_krts)
 
 
-ordered_mmps <- c("MMP17" , "ADAMTS6" , "ADAMTS13",   "MMP24"  ,    "MMP13" ,  "ADAMTS3" , 
-                   "TIMP2" ,  "MMP19"  , 
-                   "ADAMTS2",  "MMP21" ,   "MMP16" ,  "ADAMTS5" ,  "TIMP3" ,   "MMP2"   ,  "MMP14"   ,  "ADAMTS8",
-                   "ADAMTS10"  ,  "MMP11"  , 
-                   "ADAMTS9", "ADAMTS4","ADAMTS1" , "ADAMTS12",
-                   "MMP27"  ,
-                   
-                   "MMP10",    "ADAMTS7" ,   "TIMP1"  , "MMP1"   , "MMP3"    , "MMP12"  , 
-                   "MMP25" ,  "MMP9"  ,
-                   "MMP28"  ,"MMP26"  ,      "MMP20"  , 
-                   "ADAMTS17" ,   "MMP8"   ,"MMP7"  ,   "MMP15" ,"ADAMTS14"   )
+ordered_krts <- c( "KRT25",  "KRT79", "KRT1", "KRT36", "KRT222",
+                   "KRT26", "KRT28","KRT85", "KRT10",  "KRT81",  "KRT9", "KRT15", 
+                   "KRT6C", "KRT32", "KRT75",  "KRT19", "KRT23", "KRT33B", "KRT35", 
+                   "KRT6B", "KRT6A", "KRT16", "KRT17", "KRT80", "KRT34",   "KRT31", 
+                   "KRT18","KRT5",  "KRT7", "KRT14", "KRT13",  "KRT8", "KRT86", "KRT39",  "KRT37",
+                    "KRT71",  "KRT74", "KRT77" ,"KRT76", 
+                    "KRT72",     "KRT2",   "KRT40", "KRT33A","KRT20", "KRT12", "KRT27",  "KRT78", "KRT73","KRT3","KRT4",
+                     "KRT24",     "KRT84")
 
 
-pheatmap_result <- pheatmap(
-  scaled_gene_expression[, ordered_cols1],
+pheatmap(
+  scaled_gene_expression[, ordered_krts],
   cellwidth = 12,
   cellheight = 12,
   cluster_rows = F,  # Cluster rows
   cluster_cols = F,  # Cluster columns
   scale = "none"  ,       # No scaling
-  treeheight_col = 0
+  treeheight_col = 0,
+  angle_col = 90
 )
 
 
