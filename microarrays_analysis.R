@@ -83,7 +83,7 @@ tT_mmp_filtered <- tT_mmp %>% filter(P.Value < 0.05 )
 ##########   save the results ########################  
   
 # write.csv(tT_mmp, "microarrays_stroma_DE.csv", quote = FALSE, row.names = FALSE)
-  
+deg_table <- read_csv('microarrays_stroma_DE.csv')  
 #### plot volcano plot ######
 filtered_genes <- tT_mmp_filtered$GeneSymbols                
 # Volcano Plot
@@ -129,14 +129,18 @@ expression_data_mmp15 <- subset(expression_data_long1, GeneSymbols == 'MMP15')
 
 ######################## plot boxplot for mmp 15 ##########################
 
+p_mmp15 <- deg_table[deg_table$GeneSymbols == "MMP15", "adj.P.Val"][1]
 
 ggplot(expression_data_mmp15, aes(x = Condition, y = Expression, fill = Condition)) +
   geom_boxplot(color = "black", outlier.shape = NA) +
   geom_jitter(width = 0.16, size = 3.5, alpha = 1) +
   stat_compare_means(
-    comparisons = list(c("KC", "control")),
-    method = "wilcox.test", label = "p.signif"
-  ) +
+  comparisons = list(c("KC", "control")),
+  method = "wilcox.test", label = "p.signif"
+   ) +
+  annotate("text",
+           x = 1.5, y = 9.8,
+           label = paste0("FDR = ", signif(p_mmp15, 2))) +
   scale_fill_manual(values = c("#337FC2", "#C03A30")) +
   labs(title = "Expression of Selected Genes", y = "Normalized Expression", x = "Condition") +
   theme_minimal(base_size = 14) +
