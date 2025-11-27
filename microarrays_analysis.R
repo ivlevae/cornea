@@ -140,7 +140,7 @@ ggplot(expression_data_mmp15, aes(x = Condition, y = Expression, fill = Conditio
    ) +
   annotate("text",
            x = 1.5, y = 9.8,
-           label = paste0("FDR = ", signif(p_mmp15, 2))) +
+           label = paste0("p_value_adj = ", signif(p_mmp15, 2))) +
   scale_fill_manual(values = c("#337FC2", "#C03A30")) +
   labs(title = "Expression of Selected Genes", y = "Normalized Expression", x = "Condition") +
   theme_minimal(base_size = 14) +
