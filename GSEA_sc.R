@@ -1,3 +1,4 @@
+#Load required libraries
 library(msigdbr)
 library(escape)
 library(dplyr)
@@ -5,7 +6,7 @@ library(Seurat)
 library(SeuratDisk)
 library("radarchart")
 library(ggplot2) 
-
+#Load MSigDB C5 gene ontology biological process gene sets
 gene.sets1 <- getGeneSets(library = "C5")
 
 gene.sets_df <- data.frame(
@@ -49,7 +50,7 @@ prefinalObj <- AddMetaData(prefinalObj, ES)
 View(prefinalObj@meta.data)
 
 typeof(ES2)
-
+# Reorder cluster annotations for plotting
 desired_order <- c(
   "Endothelium",
   "Limbal fibroblasts",
@@ -187,7 +188,7 @@ chartJSRadar(df_final, maxScale = 1, showToolTipLabel=TRUE)
 
 
 View(df_wide)
-
+#Radar plot
 chartJSRadar(scores, maxScale = 10, showToolTipLabel=TRUE)
 
 
