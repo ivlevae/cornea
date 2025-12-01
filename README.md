@@ -12,7 +12,7 @@ The manuscript link is available below: <br />
 [Manuscript](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE176204) <br />
 
 
-The master atlas is available on CELLxGENE. <br />
+The master atlas is available on CELLxGENE: <br />
 [Atlas](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE176204) <br />
 
 If you have any questions regarding the data, analysis or further improvements, here are the contacts: <br />
