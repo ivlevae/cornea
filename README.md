@@ -4,7 +4,7 @@ The analysis is separated into the following parts:<br />
 1. Bulk RNA-seq data processing<br />
 2. scRNAseq individual objects processing<br />
 3. scRNAseq data integration and filtering<br />
-4. Downstream analysis<br />
+4. Downstream analysis
                 
 The manuscript link is available below: <br />
 [Manuscript](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE176204) <br />
